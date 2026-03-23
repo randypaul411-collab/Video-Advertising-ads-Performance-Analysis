@@ -80,7 +80,7 @@ LEFT JOIN platforms p
 ---
 ## Data Cleaning Process
 
-### 1. Extracting Advertisement Names
+### 1. Extracting Advertisement Names and Video type
 Some advertisement names were missing but embedded in the video file path. SQL string functions were used to extract the campaign name.
 
 Example path:
@@ -102,6 +102,32 @@ REPLACE(
 REPLACE(SUBSTRING_INDEX(path,'/',-1),'-short.mp4',''),'-long.mp4',''),'.mp4',''
 )
 WHERE ad_name IS NULL;
+
+
+
+-- Extract long and short
+SELECT path,
+CASE 
+   WHEN path LIKE '%-long.mp4%' THEN 'long'
+   WHEN path LIKE '%-short%' THEN 'short'
+   ELSE 'Unknown'
+END
+AS Video_type
+FROM video_ad_performance;
+
+-- alter table
+
+ALTER TABLE video_ad_performance
+ADD COLUMN video_type VARCHAR(50);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE video_ad_performance
+SET Video_type =
+CASE 
+   WHEN path LIKE '%-long.mp4%' THEN 'long'
+   WHEN path LIKE '%-short%' THEN 'short'
+   ELSE 'Unknown'
+END;
 
 ```
 
@@ -197,6 +223,7 @@ The cleaned dataset contains the following fields:
 | **watch_count**	| Number of times the ad was watched |
 | **total_time_watched** |	Total engagement time |
 | **price_per_watch** |	Cost per watch |
+|**video_type**  | The type of ad (Long or short) |
 
 This dataset can now support various advertising performance analyses such as:
 
