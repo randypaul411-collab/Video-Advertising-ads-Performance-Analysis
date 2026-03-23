@@ -113,6 +113,8 @@ REPLACE(REPLACE( SUBSTRING_INDEX(path,'/',-1), '-short.mp4',''),'-long.mp4',''),
 WHERE ad_name IS NULL
 AND video_id IS NOT NULL;
 
+
+
 -- checking for NULL and N/A website
 SELECT * 
 FROM video_ad_performance
@@ -165,7 +167,31 @@ WHERE watch_count is NULL
 AND total_time_watched is NULL 
 AND price_per_watch is NULL;
 
+-- Extract long and short
+SELECT path,
+CASE 
+   WHEN path LIKE '%-long.mp4%' THEN 'long'
+   WHEN path LIKE '%-short%' THEN 'short'
+   ELSE 'Unknown'
+END
+AS Video_type
+FROM video_ad_performance;
+
+-- alter table
+
+ALTER TABLE video_ad_performance
+ADD COLUMN video_type VARCHAR(50);
+
+SET SQL_SAFE_UPDATES = 0;
+UPDATE video_ad_performance
+SET Video_type =
+CASE 
+   WHEN path LIKE '%-long.mp4%' THEN 'long'
+   WHEN path LIKE '%-short%' THEN 'short'
+   ELSE 'Unknown'
+END;
+
 -- FINAL DATASET
-SELECT * 
-FROM video_ad_performance
+SELECT *
+FROM video_ad_performance;
 
